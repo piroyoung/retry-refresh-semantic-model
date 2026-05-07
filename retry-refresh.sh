@@ -2,7 +2,7 @@
 #
 # retry-refresh.sh
 #
-# Microsoft Fabric ワークスペース "demo-02" 内のすべてのセマンティックモデルの
+# Microsoft Fabric ワークスペース内のすべてのセマンティックモデルの
 # 直近の更新 (refresh) ログを取得し、Failed だったものを再実行する。
 #
 # 実行環境: Azure Container Apps Job (User Assigned / System Assigned Managed Identity)
