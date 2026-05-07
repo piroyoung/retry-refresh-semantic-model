@@ -10,17 +10,18 @@
 #     ロール (Contributor 推奨) を付与しておくこと。
 #
 # 必要な環境変数:
-#   WORKSPACE_NAME        : 対象 Fabric ワークスペース名 (default: demo-02)
+#   WORKSPACE_NAME        : 対象 Fabric ワークスペース名 (必須)
 #   AZURE_CLIENT_ID       : User Assigned Managed Identity を使う場合に指定 (任意)
 #
 set -euo pipefail
 
-WORKSPACE_NAME="${WORKSPACE_NAME:-demo-02}"
 FABRIC_API="https://api.fabric.microsoft.com/v1"
 POWERBI_API="https://api.powerbi.com/v1.0/myorg"
 
 log() { printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
+
+: "${WORKSPACE_NAME:?環境変数 WORKSPACE_NAME を設定してください (例: demo-02)}"
 
 command -v az    >/dev/null || die "az CLI が必要です"
 command -v jq    >/dev/null || die "jq が必要です"

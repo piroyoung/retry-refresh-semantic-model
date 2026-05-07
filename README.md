@@ -13,10 +13,10 @@ Container Apps Job に割り当てる Managed Identity に対して、対象 Fab
 
 ## 環境変数
 
-| 変数名 | 説明 | デフォルト |
+| 変数名 | 説明 | 必須 |
 | --- | --- | --- |
-| `WORKSPACE_NAME` | 対象 Fabric ワークスペース名 | `demo-02` |
-| `AZURE_CLIENT_ID` | User Assigned Managed Identity の Client ID（任意） | — |
+| `WORKSPACE_NAME` | 対象 Fabric ワークスペース名 | ✅ |
+| `AZURE_CLIENT_ID` | User Assigned Managed Identity の Client ID | — |
 
 ## ビルド & デプロイ例
 
