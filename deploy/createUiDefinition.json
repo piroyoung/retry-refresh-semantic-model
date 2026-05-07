@@ -24,7 +24,6 @@
                             "name": "workspaceName",
                             "type": "Microsoft.Common.TextBox",
                             "label": "Fabric ワークスペース名",
-                            "defaultValue": "demo-02",
                             "toolTip": "対象の Microsoft Fabric ワークスペース名 (displayName)",
                             "constraints": {
                                 "required": true,

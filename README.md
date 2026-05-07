@@ -34,7 +34,7 @@ az containerapp job start -n <prefix>-job -g <resource-group>
 
 ## 必要な権限
 
-Container Apps Job に割り当てる Managed Identity に対して、対象 Fabric ワークスペース (`demo-02`) の **Contributor 以上** のロールを付与してください（Power BI dataset refresh API を呼ぶため）。
+Container Apps Job に割り当てる Managed Identity に対して、対象 Fabric ワークスペースの **Contributor 以上** のロールを付与してください（Power BI dataset refresh API を呼ぶため）。
 
 ## 環境変数
 
@@ -61,7 +61,7 @@ az containerapp job create \
   --mi-user-assigned <UAMI_RESOURCE_ID> \
   --registry-identity <UAMI_RESOURCE_ID> \
   --registry-server <ACR_NAME>.azurecr.io \
-  --env-vars WORKSPACE_NAME=demo-02 AZURE_CLIENT_ID=<UAMI_CLIENT_ID>
+  --env-vars WORKSPACE_NAME=<FABRIC_WORKSPACE_NAME> AZURE_CLIENT_ID=<UAMI_CLIENT_ID>
 ```
 
 ## 動作概要
