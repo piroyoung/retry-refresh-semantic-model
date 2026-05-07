@@ -1,5 +1,8 @@
 # retry-refresh-semantic-model
 
+> [!WARNING]
+> 本リポジトリはデモ・サンプル実装です。動作・セキュリティ・運用品質について **いかなる保証も行いません**。本番環境での利用や顧客環境への適用にあたっては、内容を十分にレビューしたうえで **自己責任** にてご利用ください。
+
 Microsoft Fabric ワークスペース内のセマンティックモデルの直近の更新ステータスを取得し、`Failed` のものを再実行する Shell Script と、Azure Container Apps Job で動かすための Dockerfile。
 
 ## ワンクリックデプロイ
