@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "Fabric Semantic Model Refresh Retry",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "基本設定",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope",
+                            "location": {
+                                "resourceTypes": [
+                                    "Microsoft.App/managedEnvironments",
+                                    "Microsoft.App/jobs",
+                                    "Microsoft.ManagedIdentity/userAssignedIdentities"
+                                ]
+                            }
+                        },
+                        {
+                            "name": "workspaceName",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "Fabric ワークスペース名",
+                            "defaultValue": "demo-02",
+                            "toolTip": "対象の Microsoft Fabric ワークスペース名 (displayName)",
+                            "constraints": {
+                                "required": true,
+                                "regex": "^[\\w\\-\\. ]{1,80}$",
+                                "validationMessage": "1-80 文字の英数字・ハイフン等を指定してください"
+                            }
+                        },
+                        {
+                            "name": "namePrefix",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "リソース名プレフィックス",
+                            "defaultValue": "fabric-refresh-retry",
+                            "constraints": {
+                                "required": true,
+                                "regex": "^[a-z0-9][a-z0-9-]{2,30}[a-z0-9]$",
+                                "validationMessage": "小文字英数字とハイフンのみ、4-32 文字"
+                            }
+                        },
+                        {
+                            "name": "cronExpression",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "Cron 式 (UTC)",
+                            "defaultValue": "0 * * * *",
+                            "toolTip": "実行スケジュール。デフォルトは 1 時間ごと",
+                            "constraints": {
+                                "required": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "parameters": {
+                "namePrefix": "[steps('basics').namePrefix]",
+                "workspaceName": "[steps('basics').workspaceName]",
+                "cronExpression": "[steps('basics').cronExpression]",
+                "location": "[steps('basics').resourceScope.location.name]"
+            },
+            "kind": "ResourceGroup",
+            "location": "[steps('basics').resourceScope.location.name]",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]"
+        }
+    }
+}

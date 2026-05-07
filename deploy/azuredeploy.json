@@ -1,0 +1,172 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.41.2.15936",
+      "templateHash": "12342588052903288253"
+    }
+  },
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "defaultValue": "fabric-refresh-retry",
+      "metadata": {
+        "description": "デプロイ名のプレフィックス（リソース名に使用）"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure リージョン"
+      }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "対象 Microsoft Fabric ワークスペース名"
+      }
+    },
+    "cronExpression": {
+      "type": "string",
+      "defaultValue": "0 * * * *",
+      "metadata": {
+        "description": "cron 実行スケジュール (UTC)。デフォルトは 1 時間ごと"
+      }
+    },
+    "containerImage": {
+      "type": "string",
+      "defaultValue": "ghcr.io/piroyoung/retry-refresh-semantic-model:latest",
+      "metadata": {
+        "description": "使用するコンテナイメージ"
+      }
+    },
+    "replicaTimeout": {
+      "type": "int",
+      "defaultValue": 1800,
+      "metadata": {
+        "description": "Job タイムアウト秒"
+      }
+    }
+  },
+  "variables": {
+    "uniqueSuffix": "[toLower(uniqueString(resourceGroup().id, parameters('namePrefix')))]",
+    "uamiName": "[format('{0}-mi', parameters('namePrefix'))]",
+    "lawName": "[format('{0}-law-{1}', parameters('namePrefix'), variables('uniqueSuffix'))]",
+    "envName": "[format('{0}-env', parameters('namePrefix'))]",
+    "jobName": "[format('{0}-job', parameters('namePrefix'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[variables('uamiName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('lawName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('envName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2023-09-01').customerId]",
+            "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2023-09-01').primarySharedKey]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/jobs",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('jobName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('uamiName')))]": {}
+        }
+      },
+      "properties": {
+        "environmentId": "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
+        "configuration": {
+          "triggerType": "Schedule",
+          "replicaTimeout": "[parameters('replicaTimeout')]",
+          "replicaRetryLimit": 1,
+          "scheduleTriggerConfig": {
+            "cronExpression": "[parameters('cronExpression')]",
+            "parallelism": 1,
+            "replicaCompletionCount": 1
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "retry-refresh",
+              "image": "[parameters('containerImage')]",
+              "resources": {
+                "cpu": "[json('0.25')]",
+                "memory": "0.5Gi"
+              },
+              "env": [
+                {
+                  "name": "WORKSPACE_NAME",
+                  "value": "[parameters('workspaceName')]"
+                },
+                {
+                  "name": "AZURE_CLIENT_ID",
+                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('uamiName')), '2023-01-31').clientId]"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', variables('envName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('uamiName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "managedIdentityClientId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('uamiName')), '2023-01-31').clientId]"
+    },
+    "managedIdentityPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('uamiName')), '2023-01-31').principalId]"
+    },
+    "managedIdentityName": {
+      "type": "string",
+      "value": "[variables('uamiName')]"
+    },
+    "jobName": {
+      "type": "string",
+      "value": "[variables('jobName')]"
+    },
+    "environmentName": {
+      "type": "string",
+      "value": "[variables('envName')]"
+    }
+  }
+}

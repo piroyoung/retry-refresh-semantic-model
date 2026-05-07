@@ -1,6 +1,31 @@
 # retry-refresh-semantic-model
 
-Microsoft Fabric ワークスペース `demo-02` 内のセマンティックモデルの直近の更新ステータスを取得し、`Failed` のものを再実行する Shell Script と、Azure Container Apps Job で動かすための Dockerfile。
+Microsoft Fabric ワークスペース内のセマンティックモデルの直近の更新ステータスを取得し、`Failed` のものを再実行する Shell Script と、Azure Container Apps Job で動かすための Dockerfile。
+
+## ワンクリックデプロイ
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fpiroyoung%2Fretry-refresh-semantic-model%2Fmain%2Fdeploy%2Fazuredeploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fpiroyoung%2Fretry-refresh-semantic-model%2Fmain%2Fdeploy%2FcreateUiDefinition.json)
+[![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](https://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fpiroyoung%2Fretry-refresh-semantic-model%2Fmain%2Fdeploy%2Fazuredeploy.json)
+
+ボタンクリック後、Azure ポータルのフォームで **Fabric ワークスペース名** と **Cron 式** を入力するだけで以下が一括デプロイされます。
+
+- User Assigned Managed Identity
+- Log Analytics Workspace
+- Container Apps Environment
+- Container Apps Job (スケジュール実行 / GHCR の公開イメージを利用)
+
+### デプロイ後に必要な作業 (1 ステップ)
+
+Fabric の RBAC は ARM では設定できないため、デプロイ後に **Fabric ポータル** で以下を行ってください。
+
+1. 対象 Fabric ワークスペース → **アクセス管理** を開く
+2. デプロイで作成された **Managed Identity (`<prefix>-mi`)** を **Contributor** として追加
+
+これだけで Container Apps Job がスケジュールに従って実行されます。手動実行は次のコマンドでも可能です:
+
+```bash
+az containerapp job start -n <prefix>-job -g <resource-group>
+```
 
 ## 構成
 
